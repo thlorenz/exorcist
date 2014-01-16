@@ -1,6 +1,6 @@
 # exorcist [![build status](https://secure.travis-ci.org/thlorenz/exorcist.png)](http://travis-ci.org/thlorenz/exorcist)
 
-Externalizes the source map found inside a JavaScript file to an external `.js.map` file
+Externalizes the source map found inside a stream to an external `.js.map` file
 
 ```js
 var browserify = require('browserify')

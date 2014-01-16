@@ -1,7 +1,7 @@
 {
   "name": "exorcist",
   "version": "0.1.1",
-  "description": "Externalizes the source map found inside a JavaScript file to an external `.js.map` file",
+  "description": "Externalizes the source map found inside a stream to an external `.js.map` file",
   "bin": {
     "exorcist": "./bin/exorcist.js"
   },
@@ -23,7 +23,7 @@
     "tap": "~0.4.3",
     "browserify": "~3.20.0"
   },
-  "keywords": [],
+  "keywords": [ "source-map", "source", "map", "external", "mapfile", "browserify" ],
   "author": {
     "name": "Thorsten Lorenz",
     "email": "thlorenz@gmx.de",

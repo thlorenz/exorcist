@@ -68,6 +68,10 @@ EXAMPLE:
 <div class="description">
 <p>Transforms the incoming stream of code by removing the inlined source map and writing it to an external map file.
 Additionally it adds a source map url that points to the extracted map file.</p>
+<h4>Events (other than all stream events like <code>error</code>)</h4>
+<ul>
+<li><code>missing-map</code> emitted if no map was found in the stream (the src still is piped through in this case, but no map file is written)</li>
+</ul>
 </div>
 <h5>Parameters:</h5>
 <table class="params">

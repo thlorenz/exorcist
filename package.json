@@ -29,7 +29,8 @@
     "map",
     "external",
     "mapfile",
-    "browserify"
+    "browserify",
+    "browserify-tool"
   ],
   "author": {
     "name": "Thorsten Lorenz",

@@ -3,6 +3,7 @@
 var convert = require('convert-source-map')
   , path = require('path')
   , fs = require('fs')
+  , JSON5 = require('json5')
   , through = require('through2');
 
 function separate(src, file, root, url) {
@@ -22,7 +23,7 @@ function separate(src, file, root, url) {
   return { json: json, src: newSrc + '\n' + comment }
 }
 
-var go = module.exports = 
+var go = module.exports =
 
 /**
  * Transforms the incoming stream of code by removing the inlined source map and writing it to an external map file.
@@ -31,7 +32,7 @@ var go = module.exports =
  * #### Events (other than all stream events like `error`)
  *
  *  - `missing-map` emitted if no map was found in the stream (the src still is piped through in this case, but no map file is written)
- * 
+ *
  * @name exorcist
  * @function
  * @param {String} file full path to the map file to which to write the extracted source map
@@ -53,11 +54,11 @@ function exorcist(file, url, root) {
           + 'Therefore it was piped through as is and no external map file generated.'
       );
       self.push(src);
-      return cb(); 
+      return cb();
     }
     self.push(separated.src);
-    fs.writeFile(file, separated.json, 'utf8', cb)
+    fs.writeFile(file, JSON5.stringify(JSON5.parse(separated.json)), 'utf8', cb)
   }
 
   return through(ondata, onend);
-}
+};

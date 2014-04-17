@@ -22,6 +22,18 @@ browserify()
 browserify main.js --debug | exorcist bundle.js.map > bundle.js 
 ```
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
+
+- [Usage](#usage)
+- [Installation](#installation)
+- [API](#api)
+- [Integration with other tools](#integration-with-other-tools)
+- [License](#license)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Usage
 
 ```
@@ -146,6 +158,10 @@ Type
 *generated with [docme](https://github.com/thlorenz/docme)*
 </div>
 <!-- END docme generated API please keep comment here to allow auto update -->
+
+## Integration with other tools
+
+- [using exorcist with gulp](https://github.com/thlorenz/exorcist/wiki/Recipes#gulp)
 
 ## License
 

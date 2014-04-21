@@ -39,7 +39,7 @@ browserify main.js --debug | exorcist bundle.js.map > bundle.js
 ```
 exorcist <mapfile> <exorcist-options>
 
-  Externalizes the source map of a file that is streamed into it by pointing it's source map url to the <mapfile>.
+  Externalizes the source map of a file that is streamed into it by pointing its source map url to the <mapfile>.
   The original source map is written to the <mapfile> as json.
   
 OPTIONS:

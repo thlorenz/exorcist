@@ -4,6 +4,7 @@
 var test     = require('tap').test
 var fs       = require('fs');
 var through  = require('through2')
+var stream   = require('stream')
 var exorcist = require('../')
 
 var fixtures = __dirname + '/fixtures';
@@ -29,8 +30,63 @@ test('\nwhen piping a bundle generated with browserify through exorcist without 
 
       var map = JSON.parse(fs.readFileSync(mapfile, 'utf8'));
       t.equal(map.file, 'generated.js', 'leaves file name unchanged')
-      t.equal(map.sources.length, 4, 'maps 4 source files') 
-      t.equal(map.sourcesContent.length, 4, 'includes 4 source contents') 
+      t.equal(map.sources.length, 4, 'maps 4 source files')
+      t.equal(map.sourcesContent.length, 4, 'includes 4 source contents')
+      t.equal(map.mappings.length, 106, 'maintains mappings')
+      t.equal(map.sourceRoot, '', 'leaves source root an empty string')
+
+      cb();
+      t.end()
+    }
+})
+
+test('\nwhen piping a bundle generated with browserify through exorcist using a fs write stream as output', function (t) {
+  setup();
+  var data = ''
+  var ws = fs.createWriteStream(mapfile, {encoding: 'utf8'})
+  fs.createReadStream(fixtures + '/bundle.js', 'utf8')
+    .pipe(exorcist(ws, 'bundle.js.map'))
+    .pipe(through(onread, onflush));
+
+    function onread(d, _, cb) { data += d; cb(); }
+
+    function onflush(cb) {
+      var lines = data.split('\n')
+      t.equal(lines.length, 27, 'pipes entire bundle including prelude, sources and source map url')
+      t.equal(lines.pop(), '//# sourceMappingURL=bundle.js.map', 'last line as source map url pointing to .js.map file')
+
+      var map = JSON.parse(fs.readFileSync(mapfile, 'utf8'));
+      t.equal(map.file, 'generated.js', 'leaves file name unchanged')
+      t.equal(map.sources.length, 4, 'maps 4 source files')
+      t.equal(map.sourcesContent.length, 4, 'includes 4 source contents')
+      t.equal(map.mappings.length, 106, 'maintains mappings')
+      t.equal(map.sourceRoot, '', 'leaves source root an empty string')
+
+      cb();
+      t.end()
+    }
+})
+
+test('\nwhen piping a bundle generated with browserify through exorcist using a non-fs writable stream as output', function (t) {
+  setup();
+  var data = ''
+  var ws = new stream.PassThrough()
+  ws.pipe(fs.createWriteStream(mapfile, {encoding: 'utf8'}))
+  fs.createReadStream(fixtures + '/bundle.js', 'utf8')
+    .pipe(exorcist(ws, 'bundle.js.map'))
+    .pipe(through(onread, onflush));
+
+    function onread(d, _, cb) { data += d; cb(); }
+
+    function onflush(cb) {
+      var lines = data.split('\n')
+      t.equal(lines.length, 27, 'pipes entire bundle including prelude, sources and source map url')
+      t.equal(lines.pop(), '//# sourceMappingURL=bundle.js.map', 'last line as source map url pointing to .js.map file')
+
+      var map = JSON.parse(fs.readFileSync(mapfile, 'utf8'));
+      t.equal(map.file, 'generated.js', 'leaves file name unchanged')
+      t.equal(map.sources.length, 4, 'maps 4 source files')
+      t.equal(map.sourcesContent.length, 4, 'includes 4 source contents')
       t.equal(map.mappings.length, 106, 'maintains mappings')
       t.equal(map.sourceRoot, '', 'leaves source root an empty string')
 
@@ -55,8 +111,8 @@ test('\nwhen piping a bundle generated with browserify through exorcist and adju
 
       var map = JSON.parse(fs.readFileSync(mapfile, 'utf8'));
       t.equal(map.file, 'generated.js', 'leaves file name unchanged')
-      t.equal(map.sources.length, 4, 'maps 4 source files') 
-      t.equal(map.sourcesContent.length, 4, 'includes 4 source contents') 
+      t.equal(map.sources.length, 4, 'maps 4 source files')
+      t.equal(map.sourcesContent.length, 4, 'includes 4 source contents')
       t.equal(map.mappings.length, 106, 'maintains mappings')
       t.equal(map.sourceRoot, '', 'leaves source root an empty string')
 
@@ -81,8 +137,8 @@ test('\nwhen piping a bundle generated with browserify through exorcist and adju
 
       var map = JSON.parse(fs.readFileSync(mapfile, 'utf8'));
       t.equal(map.file, 'generated.js', 'leaves file name unchanged')
-      t.equal(map.sources.length, 4, 'maps 4 source files') 
-      t.equal(map.sourcesContent.length, 4, 'includes 4 source contents') 
+      t.equal(map.sources.length, 4, 'maps 4 source files')
+      t.equal(map.sourcesContent.length, 4, 'includes 4 source contents')
       t.equal(map.mappings.length, 106, 'maintains mappings')
       t.equal(map.sourceRoot, '/hello/world.map.js', 'adapts source root')
 

@@ -2,7 +2,7 @@
 'use strict';
 
 var go = module.exports = function () {
-  return 'hey, I am bar';    
+  return 'hey, I am bar';
 };
 
 },{}],2:[function(require,module,exports){
@@ -11,7 +11,7 @@ var go = module.exports = function () {
 var bar = require('./bar');
 
 var go = module.exports = function () {
-  console.log(bar());  
+  console.log(bar());
 };
 
 },{"./bar":1}],3:[function(require,module,exports){

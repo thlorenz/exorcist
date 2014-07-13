@@ -14,7 +14,13 @@ function separate(src, file, root, url) {
     .setProperty('sourceRoot', root || '')
     .toJSON(2);
 
-  url = url || path.basename(file);
+  if ( !url ) {
+    if ( typeof file === 'string' ) {
+      url = path.basename(file);
+    } else {
+      throw new Error("exorcist: url argument must be passed if file is not a file path string");
+    }
+  }
 
   var newSrc = convert.removeComments(src);
   var comment = '//# sourceMappingURL=' + url;
@@ -44,8 +50,14 @@ function exorcist(file, url, root) {
 
   function ondata(d, _, cb) { src += d; cb(); }
   function onend(cb) {
-    var self = this;
-    var separated = separate(src, file, root, url);
+    var self = this,
+        separated;
+    try {
+      separated = separate(src, file, root, url);
+    } catch (err) {
+      self.emit('error', err);
+      return cb();
+    }
     if (!separated) {
       self.emit(
           'missing-map'
@@ -56,7 +68,27 @@ function exorcist(file, url, root) {
       return cb();
     }
     self.push(separated.src);
-    fs.writeFile(file, separated.json, 'utf8', cb)
+
+    if ( typeof file === 'object' && typeof file.write === 'function' && typeof file.end === 'function' && typeof file.on === 'function' ) {
+      // Does it look like a writableStream? If so, pipe data into it and end the stream.
+      file.on('error', function(err) {
+        self.emit('error', err);
+        cb();
+        // Make sure we only run the callback once
+        cb = function() {};
+      });
+      file.end(separated.json, 'utf8', function() {
+        cb();
+        // Make sure we only run the callback once
+        cb = function() {};
+      });
+    } else if ( typeof file === 'string' ) {
+      // If it's a string, consider it a filename and then write to the file
+      fs.writeFile(file, separated.json, 'utf8', cb);
+    } else {
+      self.emit('error', new Error('The file given to exorcist was an unknown type.'));
+      cb();
+    }
   }
 
   return through(ondata, onend);

@@ -84,7 +84,12 @@ function exorcist(file, url, root) {
       });
     } else if ( typeof file === 'string' ) {
       // If it's a string, consider it a filename and then write to the file
-      fs.writeFile(file, separated.json, 'utf8', cb);
+      fs.writeFile(file, separated.json, 'utf8', function(err) {
+        if ( err ) {
+          self.emit('error', err);
+        }
+        cb();
+      });
     } else {
       self.emit('error', new Error('The file given to exorcist was an unknown type.'));
       cb();

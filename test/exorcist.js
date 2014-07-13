@@ -29,8 +29,8 @@ test('\nwhen piping a bundle generated with browserify through exorcist without 
 
       var map = JSON.parse(fs.readFileSync(mapfile, 'utf8'));
       t.equal(map.file, 'generated.js', 'leaves file name unchanged')
-      t.equal(map.sources.length, 4, 'maps 4 source files') 
-      t.equal(map.sourcesContent.length, 4, 'includes 4 source contents') 
+      t.equal(map.sources.length, 4, 'maps 4 source files')
+      t.equal(map.sourcesContent.length, 4, 'includes 4 source contents')
       t.equal(map.mappings.length, 106, 'maintains mappings')
       t.equal(map.sourceRoot, '', 'leaves source root an empty string')
 
@@ -55,8 +55,8 @@ test('\nwhen piping a bundle generated with browserify through exorcist and adju
 
       var map = JSON.parse(fs.readFileSync(mapfile, 'utf8'));
       t.equal(map.file, 'generated.js', 'leaves file name unchanged')
-      t.equal(map.sources.length, 4, 'maps 4 source files') 
-      t.equal(map.sourcesContent.length, 4, 'includes 4 source contents') 
+      t.equal(map.sources.length, 4, 'maps 4 source files')
+      t.equal(map.sourcesContent.length, 4, 'includes 4 source contents')
       t.equal(map.mappings.length, 106, 'maintains mappings')
       t.equal(map.sourceRoot, '', 'leaves source root an empty string')
 
@@ -81,8 +81,8 @@ test('\nwhen piping a bundle generated with browserify through exorcist and adju
 
       var map = JSON.parse(fs.readFileSync(mapfile, 'utf8'));
       t.equal(map.file, 'generated.js', 'leaves file name unchanged')
-      t.equal(map.sources.length, 4, 'maps 4 source files') 
-      t.equal(map.sourcesContent.length, 4, 'includes 4 source contents') 
+      t.equal(map.sources.length, 4, 'maps 4 source files')
+      t.equal(map.sourcesContent.length, 4, 'includes 4 source contents')
       t.equal(map.mappings.length, 106, 'maintains mappings')
       t.equal(map.sourceRoot, '/hello/world.map.js', 'adapts source root')
 

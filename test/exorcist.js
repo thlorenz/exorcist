@@ -9,12 +9,11 @@ var exorcist = require('../')
 var fixtures = __dirname + '/fixtures';
 var mapfile = fixtures + '/bundle.js.map';
 
-function setup() {
+function cleanup() {
   if (fs.existsSync(mapfile)) fs.unlinkSync(mapfile);
 }
 
 test('\nwhen piping a bundle generated with browserify through exorcist without adjusting properties', function (t) {
-  setup();
   var data = ''
   fs.createReadStream(fixtures + '/bundle.js', 'utf8')
     .pipe(exorcist(mapfile))
@@ -35,12 +34,12 @@ test('\nwhen piping a bundle generated with browserify through exorcist without 
       t.equal(map.sourceRoot, '', 'leaves source root an empty string')
 
       cb();
-      t.end()
+      t.end();
+      cleanup();
     }
 })
 
 test('\nwhen piping a bundle generated with browserify through exorcist and adjusting url', function (t) {
-  setup();
   var data = ''
   fs.createReadStream(fixtures + '/bundle.js', 'utf8')
     .pipe(exorcist(mapfile, 'http://my.awseome.site/bundle.js.map'))
@@ -61,12 +60,12 @@ test('\nwhen piping a bundle generated with browserify through exorcist and adju
       t.equal(map.sourceRoot, '', 'leaves source root an empty string')
 
       cb();
-      t.end()
+      t.end();
+      cleanup();
     }
 })
 
 test('\nwhen piping a bundle generated with browserify through exorcist and adjusting root and url', function (t) {
-  setup();
   var data = ''
   fs.createReadStream(fixtures + '/bundle.js', 'utf8')
     .pipe(exorcist(mapfile, 'http://my.awseome.site/bundle.js.map', '/hello/world.map.js'))
@@ -87,12 +86,12 @@ test('\nwhen piping a bundle generated with browserify through exorcist and adju
       t.equal(map.sourceRoot, '/hello/world.map.js', 'adapts source root')
 
       cb();
-      t.end()
+      t.end();
+      cleanup();
     }
 })
 
 test('\nwhen piping a bundle generated with browserify thats missing a map through exorcist' , function (t) {
-  setup();
   var data = ''
   var missingMapEmitted = false;
   fs.createReadStream(fixtures + '/bundle.nomap.js', 'utf8')

@@ -3,7 +3,8 @@
 var convert = require('convert-source-map')
   , path = require('path')
   , fs = require('fs')
-  , through = require('through2');
+  , through = require('through2')
+  , mkdirp = require('mkdirp');
 
 function separate(src, file, root, url) {
   var inlined = convert.fromSource(src);

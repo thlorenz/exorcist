@@ -57,7 +57,11 @@ function exorcist(file, url, root) {
       return cb(); 
     }
     self.push(separated.src);
-    fs.writeFile(file, separated.json, 'utf8', cb)
+    // Ensure path on fs for source map path string
+    mkdirp(path.dirname(file), function (err) {
+      if (err) return cb(err);
+      fs.writeFile(file, separated.json, 'utf8', cb);
+    });
   }
 
   return through(ondata, onend);

@@ -8,9 +8,15 @@ var exorcist = require('../')
 
 var fixtures = __dirname + '/fixtures';
 var mapfile = fixtures + '/bundle.js.map';
+var deepMapfile = fixtures + '/1/2/bundle.js.map';
 
 function cleanup() {
   if (fs.existsSync(mapfile)) fs.unlinkSync(mapfile);
+  if (fs.existsSync(deepMapfile)) {
+    fs.unlinkSync(deepMapfile);
+    fs.rmdirSync(fixtures + '/1/2');
+    fs.rmdirSync(fixtures + '/1');
+  }
 }
 
 test('\nwhen piping a bundle generated with browserify through exorcist without adjusting properties', function (t) {
@@ -107,6 +113,33 @@ test('\nwhen piping a bundle generated with browserify thats missing a map throu
       t.ok(missingMapEmitted, 'emits missing-map event')
 
       cb();
-      t.end()
+      t.end();
+      cleanup();
     }
+})
+
+test('\nwhen piping a bundle generated with missing parent folders in map path', function (t) {
+  var data = ''
+  fs.createReadStream(fixtures + '/bundle.js', 'utf8')
+    .pipe(exorcist(deepMapfile))
+    .pipe(through(onread, onflush));
+
+  function onread(d, _, cb) { data += d; cb(); }
+
+  function onflush(cb) {
+    var lines = data.split('\n')
+    t.equal(lines.length, 27, 'pipes entire bundle including prelude, sources and source map url')
+    t.equal(lines.pop(), '//# sourceMappingURL=bundle.js.map', 'last line as source map url pointing to .js.map file')
+
+    var map = JSON.parse(fs.readFileSync(deepMapfile, 'utf8'));
+    t.equal(map.file, 'generated.js', 'leaves file name unchanged')
+    t.equal(map.sources.length, 4, 'maps 4 source files')
+    t.equal(map.sourcesContent.length, 4, 'includes 4 source contents')
+    t.equal(map.mappings.length, 106, 'maintains mappings')
+    t.equal(map.sourceRoot, '', 'leaves source root an empty string')
+
+    cb();
+    t.end();
+    cleanup();
+  }
 })

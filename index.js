@@ -17,8 +17,11 @@ function separate(src, file, root, url) {
 
   url = url || path.basename(file);
 
+  var type = url.split('.').slice(-2, -1)[0];
   var newSrc = convert.removeComments(src);
-  var comment = '//# sourceMappingURL=' + url;
+  var comment = type === 'css' ? '/*' : '//';
+  comment += '# sourceMappingURL=' + url;
+  comment += type === 'css' ? ' */' : '';
 
   return { json: json, src: newSrc + '\n' + comment }
 }

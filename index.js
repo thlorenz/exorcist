@@ -3,7 +3,8 @@
 var convert = require('convert-source-map')
   , path = require('path')
   , fs = require('fs')
-  , through = require('through2');
+  , through = require('through2')
+  , mkdirp = require('mkdirp');
 
 function separate(src, file, root, url) {
   var inlined = convert.fromSource(src);
@@ -16,8 +17,11 @@ function separate(src, file, root, url) {
 
   url = url || path.basename(file);
 
+  var type = url.split('.').slice(-2, -1)[0];
   var newSrc = convert.removeComments(src);
-  var comment = '//# sourceMappingURL=' + url;
+  var comment = type === 'css' ? '/*' : '//';
+  comment += '# sourceMappingURL=' + url;
+  comment += type === 'css' ? ' */' : '';
 
   return { json: json, src: newSrc + '\n' + comment }
 }
@@ -56,7 +60,11 @@ function exorcist(file, url, root) {
       return cb(); 
     }
     self.push(separated.src);
-    fs.writeFile(file, separated.json, 'utf8', cb)
+    // Ensure path on fs for source map path string
+    mkdirp(path.dirname(file), function (err) {
+      if (err) return cb(err);
+      fs.writeFile(file, separated.json, 'utf8', cb);
+    });
   }
 
   return through(ondata, onend);

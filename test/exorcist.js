@@ -8,13 +8,20 @@ var exorcist = require('../')
 
 var fixtures = __dirname + '/fixtures';
 var mapfile = fixtures + '/bundle.js.map';
+var deepMapfile = fixtures + '/1/2/bundle.js.map';
+var styleMapfile = fixtures + '/to.css.map';
 
-function setup() {
+function cleanup() {
   if (fs.existsSync(mapfile)) fs.unlinkSync(mapfile);
+  if (fs.existsSync(deepMapfile)) {
+    fs.unlinkSync(deepMapfile);
+    fs.rmdirSync(fixtures + '/1/2');
+    fs.rmdirSync(fixtures + '/1');
+  }
+  if (fs.existsSync(styleMapfile)) fs.unlinkSync(styleMapfile);
 }
 
 test('\nwhen piping a bundle generated with browserify through exorcist without adjusting properties', function (t) {
-  setup();
   var data = ''
   fs.createReadStream(fixtures + '/bundle.js', 'utf8')
     .pipe(exorcist(mapfile))
@@ -35,12 +42,12 @@ test('\nwhen piping a bundle generated with browserify through exorcist without 
       t.equal(map.sourceRoot, '', 'leaves source root an empty string')
 
       cb();
-      t.end()
+      t.end();
+      cleanup();
     }
 })
 
 test('\nwhen piping a bundle generated with browserify through exorcist and adjusting url', function (t) {
-  setup();
   var data = ''
   fs.createReadStream(fixtures + '/bundle.js', 'utf8')
     .pipe(exorcist(mapfile, 'http://my.awseome.site/bundle.js.map'))
@@ -61,12 +68,12 @@ test('\nwhen piping a bundle generated with browserify through exorcist and adju
       t.equal(map.sourceRoot, '', 'leaves source root an empty string')
 
       cb();
-      t.end()
+      t.end();
+      cleanup();
     }
 })
 
 test('\nwhen piping a bundle generated with browserify through exorcist and adjusting root and url', function (t) {
-  setup();
   var data = ''
   fs.createReadStream(fixtures + '/bundle.js', 'utf8')
     .pipe(exorcist(mapfile, 'http://my.awseome.site/bundle.js.map', '/hello/world.map.js'))
@@ -87,12 +94,12 @@ test('\nwhen piping a bundle generated with browserify through exorcist and adju
       t.equal(map.sourceRoot, '/hello/world.map.js', 'adapts source root')
 
       cb();
-      t.end()
+      t.end();
+      cleanup();
     }
 })
 
 test('\nwhen piping a bundle generated with browserify thats missing a map through exorcist' , function (t) {
-  setup();
   var data = ''
   var missingMapEmitted = false;
   fs.createReadStream(fixtures + '/bundle.nomap.js', 'utf8')
@@ -108,6 +115,59 @@ test('\nwhen piping a bundle generated with browserify thats missing a map throu
       t.ok(missingMapEmitted, 'emits missing-map event')
 
       cb();
-      t.end()
+      t.end();
+      cleanup();
     }
+})
+
+test('\nwhen piping a bundle generated with missing parent folders in map path', function (t) {
+  var data = ''
+  fs.createReadStream(fixtures + '/bundle.js', 'utf8')
+    .pipe(exorcist(deepMapfile))
+    .pipe(through(onread, onflush));
+
+  function onread(d, _, cb) { data += d; cb(); }
+
+  function onflush(cb) {
+    var lines = data.split('\n')
+    t.equal(lines.length, 27, 'pipes entire bundle including prelude, sources and source map url')
+    t.equal(lines.pop(), '//# sourceMappingURL=bundle.js.map', 'last line as source map url pointing to .js.map file')
+
+    var map = JSON.parse(fs.readFileSync(deepMapfile, 'utf8'));
+    t.equal(map.file, 'generated.js', 'leaves file name unchanged')
+    t.equal(map.sources.length, 4, 'maps 4 source files')
+    t.equal(map.sourcesContent.length, 4, 'includes 4 source contents')
+    t.equal(map.mappings.length, 106, 'maintains mappings')
+    t.equal(map.sourceRoot, '', 'leaves source root an empty string')
+
+    cb();
+    t.end();
+    cleanup();
+  }
+})
+
+test('\nwhen performing a stylish exorcism', function (t) {
+  var data = ''
+  fs.createReadStream(fixtures + '/to.css', 'utf8')
+    .pipe(exorcist(styleMapfile))
+    .pipe(through(onread, onflush));
+
+  function onread(d, _, cb) { data += d; cb(); }
+
+  function onflush(cb) {
+    var lines = data.split('\n')
+    t.equal(lines.length, 23, 'pipes entire style including prelude, sources and source map url')
+    t.equal(lines.pop(), '/*# sourceMappingURL=to.css.map */', 'last line as source map url pointing to .css.map file')
+
+    var map = JSON.parse(fs.readFileSync(styleMapfile, 'utf8'));
+    t.equal(map.file, 'to.css', 'leaves file name unchanged')
+    t.equal(map.sources.length, 2, 'maps 4 source files')
+    t.equal(map.sourcesContent.length, 2, 'includes 4 source contents')
+    t.equal(map.mappings.length, 214, 'maintains mappings')
+    t.equal(map.sourceRoot, '', 'leaves source root an empty string')
+
+    cb();
+    t.end();
+    cleanup();
+  }
 })

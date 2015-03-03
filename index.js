@@ -1,63 +1,61 @@
 'use strict';
 
-var convert = require('convert-source-map')
+var mold = require('mold-source-map')
   , path = require('path')
-  , fs = require('fs')
-  , through = require('through2');
+  , fs = require('fs');
 
-function separate(src, file, root, url) {
-  var inlined = convert.fromSource(src);
+function separate(src, file, root, base, url) {
+  src.sourceRoot(root || '');
+  if (base) {
+    src.mapSources(mold.mapPathRelativeTo(base));
+  }
 
-  if (!inlined) return null;
-
-  var json = inlined
-    .setProperty('sourceRoot', root || '')
-    .toJSON(2);
+  var json = src.toJSON(2);
 
   url = url || path.basename(file);
-
-  var newSrc = convert.removeComments(src);
   var comment = '//# sourceMappingURL=' + url;
 
-  return { json: json, src: newSrc + '\n' + comment }
+  return { json: json, comment: comment }
 }
 
 var go = module.exports = 
 
 /**
- * Transforms the incoming stream of code by removing the inlined source map and writing it to an external map file.
- * Additionally it adds a source map url that points to the extracted map file.
  *
- * #### Events (other than all stream events like `error`)
+ * Externalizes the source map of the file streamed in.
  *
- *  - `missing-map` emitted if no map was found in the stream (the src still is piped through in this case, but no map file is written)
- * 
+ * The source map is written as JSON to `file`, and the original file is streamed out with its
+ * `sourceMappingURL` set to the path of `file` (or to the value of `url`).
+ *
+ * #### Events (in addition to stream events)
+ *
+ * - `missing-map` emitted if no map was found in the stream
+ *   (the src is still piped through in this case, but no map file is written)
+ *
  * @name exorcist
  * @function
  * @param {String} file full path to the map file to which to write the extracted source map
- * @param {String=} url  allows overriding the url at which the map file is found (default: name of map file)
- * @param {String=} root allows adjusting the source maps `sourceRoot` field (default: '')
+ * @param {String=} url full URL to the map file, set as `sourceMappingURL` in the streaming output (default: file)
+ * @param {String=} root root URL for loading relative source paths, set as `sourceRoot` in the source map (default: '')
+ * @param {String=} base base path for calculating relative source paths (default: use absolute paths)
  * @return {TransformStream} transform stream into which to pipe the code containing the source map
  */
-function exorcist(file, url, root) {
-  var src = '';
-
-  function ondata(d, _, cb) { src += d; cb(); }
-  function onend(cb) {
-    var self = this;
-    var separated = separate(src, file, root, url);
-    if (!separated) {
-      self.emit(
-          'missing-map'
+function exorcist(file, url, root, base) {
+  var stream = mold.transform(function(src, write) {
+    if (!src.sourcemap) {
+      stream.emit(
+        'missing-map'
         ,   'The code that you piped into exorcist contains no source map!\n'
           + 'Therefore it was piped through as is and no external map file generated.'
       );
-      self.push(src);
-      return cb(); 
+      return write(src.source);
     }
-    self.push(separated.src);
-    fs.writeFile(file, separated.json, 'utf8', cb)
-  }
 
-  return through(ondata, onend);
+    var separated = separate(src, file, root, base, url);
+    fs.writeFile(file, separated.json, 'utf8', function() {
+      write(separated.comment);
+    });
+  });
+
+  return stream;
 }

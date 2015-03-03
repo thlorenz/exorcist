@@ -13,7 +13,17 @@ function separate(src, file, root, base, url) {
   var json = src.toJSON(2);
 
   url = url || path.basename(file);
-  var comment = '//# sourceMappingURL=' + url;
+
+  var comment = '';
+  var commentRx = /^\s*\/(\/|\*)[@#]\s+sourceMappingURL/mg;
+  var commentMatch = commentRx.exec(src.source);
+  var commentBlock = (commentMatch && commentMatch[1] === '*');
+
+  if (commentBlock) {
+    comment = '/*# sourceMappingURL=' + url + ' */';
+  } else {
+    comment = '//# sourceMappingURL=' + url;
+  }
 
   return { json: json, comment: comment }
 }

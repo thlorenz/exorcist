@@ -9,7 +9,6 @@ lib-cov
 
 pids
 logs
-bundle.*
 
 npm-debug.log
 node_modules

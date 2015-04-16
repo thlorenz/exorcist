@@ -17,7 +17,7 @@ function usage() {
 
 var argv = minimist(process.argv.slice(2)
   , { boolean: [ 'h', 'help' ]
-    , string: [ 'url', 'u', 'root', 'r' ]
+    , string: [ 'url', 'u', 'root', 'r', 'base', 'b' ]
   });
 
 if (argv.h || argv.help) return usage();
@@ -30,12 +30,13 @@ if (!mapfile) {
 }
 
 var url  = argv.url  || argv.u
-  , root = argv.root || argv.r;
+  , root = argv.root || argv.r
+  , base = argv.base || argv.b;
 
 mapfile = path.resolve(mapfile);
 
 process.stdin
-  .pipe(exorcist(mapfile, url, root))
+  .pipe(exorcist(mapfile, url, root, base))
   .on('error', console.error.bind(console))
   .on('missing-map', console.error.bind(console))
   .pipe(process.stdout);

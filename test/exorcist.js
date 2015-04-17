@@ -19,7 +19,7 @@ function setup() {
 test('\nwhen piping a bundle generated with browserify through exorcist without adjusting properties', function (t) {
   setup();
   var data = ''
-  fs.createReadStream(fixtures + '/bundle.js', 'utf8')
+  fs.createReadStream(fixtures + '/bundle.js')
     .pipe(exorcist(mapfile))
     .pipe(through(onread, onflush));
 
@@ -47,7 +47,7 @@ test('\nwhen piping a bundle generated with browserify through exorcist without 
 test('\nwhen piping a bundle generated with browserify through exorcist and adjusting url', function (t) {
   setup();
   var data = ''
-  fs.createReadStream(fixtures + '/bundle.js', 'utf8')
+  fs.createReadStream(fixtures + '/bundle.js')
     .pipe(exorcist(mapfile, 'http://my.awseome.site/bundle.js.map'))
     .pipe(through(onread, onflush));
 
@@ -74,7 +74,7 @@ test('\nwhen piping a bundle generated with browserify through exorcist and adju
 test('\nwhen piping a bundle generated with browserify through exorcist and adjusting root and url', function (t) {
   setup();
   var data = ''
-  fs.createReadStream(fixtures + '/bundle.js', 'utf8')
+  fs.createReadStream(fixtures + '/bundle.js')
     .pipe(exorcist(mapfile, 'http://my.awseome.site/bundle.js.map', 'http://my.awesome.site/src'))
     .pipe(through(onread, onflush));
 
@@ -101,7 +101,7 @@ test('\nwhen piping a bundle generated with browserify through exorcist and adju
 test('\nwhen piping a bundle generated with browserify through exorcist and adjusting root, url, and base', function (t) {
   setup();
   var data = ''
-  fs.createReadStream(fixtures + '/bundle.js', 'utf8')
+  fs.createReadStream(fixtures + '/bundle.js')
     .pipe(exorcist(mapfile, 'http://my.awseome.site/bundle.js.map', 'http://my.awesome.site/src', base))
     .pipe(through(onread, onflush));
 
@@ -130,7 +130,7 @@ test('\nwhen piping a bundle generated with browserify thats missing a map throu
   setup();
   var data = ''
   var missingMapEmitted = false;
-  fs.createReadStream(fixtures + '/bundle.nomap.js', 'utf8')
+  fs.createReadStream(fixtures + '/bundle.nomap.js')
     .pipe(exorcist(mapfile))
     .on('missing-map', function () { missingMapEmitted = true })
     .pipe(through(onread, onflush));

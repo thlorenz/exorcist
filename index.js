@@ -2,6 +2,7 @@
 
 var mold = require('mold-source-map')
   , path = require('path')
+  , mkdirp = require('mkdirp')
   , fs = require('fs');
 
 function separate(src, file, root, base, url) {
@@ -60,7 +61,9 @@ function exorcist(file, url, root, base) {
       );
       return write(src.source);
     }
-
+    // make sure the file folder exists
+    mkdirp.sync(path.dirname(file));
+    
     var separated = separate(src, file, root, base, url);
     fs.writeFile(file, separated.json, 'utf8', function() {
       write(separated.comment);

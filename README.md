@@ -51,7 +51,8 @@ OPTIONS:
   --base   -b   Base path for calculating relative source paths. (default: use absolute paths)
   --root   -r   Root URL for loading relative source paths. Set as sourceRoot in the source map. (default: '')
   --url    -u   Full URL to source map. Set as sourceMappingURL in the output stream. (default: map_file)
-  --output -o   Path to the file where the JS content is wrote. (default: map_file)
+  --input   -i  Input path of the JS with its inlined map content. (default: stdin)
+  --output -o   Output path of the JS content. (default: stdout)
 
 EXAMPLE:
 

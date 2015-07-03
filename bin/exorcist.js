@@ -32,11 +32,12 @@ if (!mapfile) {
 var url     = argv.url    || argv.u
   , root    = argv.root   || argv.r
   , base    = argv.base   || argv.b
+  , input   = argv.input  || argv.i
   , output  = argv.output || argv.o;
 
 mapfile = path.resolve(mapfile);
 
-process.stdin
+(input ? fs.createReadStream(input) : process.stdin)
   .pipe(exorcist(mapfile, url, root, base))
   .on('error', console.error.bind(console))
   .on('missing-map', console.error.bind(console))

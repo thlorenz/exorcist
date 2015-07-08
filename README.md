@@ -39,7 +39,7 @@ browserify main.js --debug | exorcist bundle.js.map > bundle.js
 ## Usage
 
 ```
-exorcist map_file [options]
+exorcist map_file [js_file] [options]
 
   Externalizes the source map of the file streamed in.
 
@@ -51,7 +51,6 @@ OPTIONS:
   --base   -b   Base path for calculating relative source paths. (default: use absolute paths)
   --root   -r   Root URL for loading relative source paths. Set as sourceRoot in the source map. (default: '')
   --url    -u   Full URL to source map. Set as sourceMappingURL in the output stream. (default: map_file)
-  --output -o   Path to the file where the JS content is wrote. (default: map_file)
 
 EXAMPLE:
 
@@ -61,7 +60,7 @@ EXAMPLE:
     
   Take an existing bundled file and split it into two files.
 
-    exorcist only-the-map.file -o only-the-js.file < bundle.js
+    exorcist only-the-map.file only-the-js.file < bundle.js
 ```
 
 ## Installation

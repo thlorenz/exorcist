@@ -10,7 +10,8 @@ var binPath       = path.resolve(__dirname + '/../bin/exorcist.js');
 var fixtures      = __dirname + '/fixtures';
 var scriptMapfile = fixtures + '/bundle.js.map';
 var styleMapfile  = fixtures + '/to.css.map';
-var jsOutputFile  = fixtures + '/bundle-cleaned.js'
+var jsInputFile = fixtures + '/bundle.js';
+var jsOutputFile  = fixtures + '/bundle-cleaned.js';
 
 // This base path is baken into the source maps in the fixtures.
 var base = '/Users/thlorenz/dev/projects/exorcist';
@@ -24,7 +25,9 @@ function cleanup() {
 function exorcist(inputFile, scriptMapfile, customArgs) {
   customArgs = [binPath, scriptMapfile].concat(customArgs || [])
   var exorcistProcess = spawn(process.execPath, customArgs, {stdio:'pipe'})
-  fs.createReadStream(inputFile).pipe(exorcistProcess.stdin)
+  if(inputFile) {
+    fs.createReadStream(inputFile).pipe(exorcistProcess.stdin)
+  }
   return exorcistProcess
 }
 
@@ -32,9 +35,8 @@ test('\nwhen output file is not provided, outputs to stdout', function (t) {
   t.on('end', cleanup);
 
   var data = ''
-  var inputFile = fixtures + '/bundle.js'
 
-  exorcist(inputFile, scriptMapfile, [''])
+  exorcist(jsInputFile, scriptMapfile, [''])
     .on('close', function(){
 
       t.equal(fs.existsSync(scriptMapfile), true, 'output file must exist')
@@ -63,7 +65,7 @@ test('\nwhen output file is not provided, outputs to stdout', function (t) {
 test('\nwhen output file is provided, outputs to a file', function (t) {
   t.on('end', cleanup);
 
-  exorcist(fixtures + '/bundle.js', scriptMapfile, [jsOutputFile])
+  exorcist(jsInputFile, scriptMapfile, [jsOutputFile])
     .on('close', function(){
 
       t.equal(fs.existsSync(jsOutputFile), true, 'output file must exist')
@@ -91,9 +93,8 @@ test('\nwhen output to stdout, it can read options', function (t) {
   t.on('end', cleanup);
 
   var data = ''
-  var inputFile = fixtures + '/bundle.js'
 
-  exorcist(inputFile, scriptMapfile, '', ['-u', 'http://my.awseome.site/bundle.js.map'])
+  exorcist(jsInputFile, scriptMapfile, ['-u', 'http://my.awseome.site/bundle.js.map'])
     .on('close', function(){
 
       t.equal(fs.existsSync(jsOutputFile), false, 'output file must not exist')
@@ -122,7 +123,33 @@ test('\nwhen output to stdout, it can read options', function (t) {
 test('\nwhen output file is provided, it can read options', function (t) {
   t.on('end', cleanup);
 
-  exorcist(fixtures + '/bundle.js', scriptMapfile, [jsOutputFile, '-u', 'http://my.awseome.site/bundle.js.map'])
+  exorcist(jsInputFile, scriptMapfile, [jsOutputFile, '-u', 'http://my.awseome.site/bundle.js.map'])
+    .on('close', function(){
+
+      t.equal(fs.existsSync(jsOutputFile), true, 'output file must exist')
+      t.equal(fs.existsSync(scriptMapfile), true, 'output file must exist')
+
+      var lines = fs.readFileSync(jsOutputFile).toString().split('\n')
+      lines.pop(); // Trailing newline
+      t.equal(lines.length, 25, 'pipes entire bundle including prelude, sources and source map url')
+      t.equal(lines.pop(), '//# sourceMappingURL=http://my.awseome.site/bundle.js.map', 'last line as source map url pointing to .js.map file at url set to supplied url')
+
+      var map = JSON.parse(fs.readFileSync(scriptMapfile, 'utf8'));
+      t.equal(map.file, 'generated.js', 'leaves file name unchanged')
+      t.equal(map.sources.length, 4, 'maps 4 source files')
+      t.equal(map.sourcesContent.length, 4, 'includes 4 source contents')
+      t.equal(map.mappings.length, 106, 'maintains mappings')
+      t.equal(map.sourceRoot, '', 'leaves source root an empty string')
+
+      t.end()
+
+    })
+})
+
+test('\nit can use a file path as input', function (t) {
+  t.on('end', cleanup);
+
+  exorcist(null, scriptMapfile, [jsOutputFile, jsInputFile, '-u', 'http://my.awseome.site/bundle.js.map'])
     .on('close', function(){
 
       t.equal(fs.existsSync(jsOutputFile), true, 'output file must exist')

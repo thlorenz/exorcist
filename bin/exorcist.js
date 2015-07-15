@@ -29,16 +29,18 @@ if (!mapfile) {
   return usage();
 }
 
-var url  = argv.url  || argv.u
-  , root = argv.root || argv.r
-  , base = argv.base || argv.b;
+var url     = argv.url    || argv.u
+  , root    = argv.root   || argv.r
+  , base    = argv.base   || argv.b
+  , output  = argv._.shift() || false
+  , input   = argv._.shift() || false;
 
 mapfile = path.resolve(mapfile);
 
-process.stdin
+(input ? fs.createReadStream(input) : process.stdin)
   .pipe(exorcist(mapfile, url, root, base))
   .on('error', console.error.bind(console))
   .on('missing-map', console.error.bind(console))
-  .pipe(process.stdout);
+  .pipe( output ? fs.createWriteStream(output) : process.stdout);
 
 })()

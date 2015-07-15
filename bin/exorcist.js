@@ -17,7 +17,7 @@ function usage() {
 
 var argv = minimist(process.argv.slice(2)
   , { boolean: [ 'h', 'help' ]
-    , string: [ 'url', 'u', 'root', 'r', 'base', 'b', 'output', 'o' ]
+    , string: [ 'url', 'u', 'root', 'r', 'base', 'b' ]
   });
 
 if (argv.h || argv.help) return usage();
@@ -32,8 +32,8 @@ if (!mapfile) {
 var url     = argv.url    || argv.u
   , root    = argv.root   || argv.r
   , base    = argv.base   || argv.b
-  , input   = argv.input  || argv.i
-  , output  = argv.output || argv.o;
+  , output  = argv._.shift() || false
+  , input   = argv._.shift() || false;
 
 mapfile = path.resolve(mapfile);
 

@@ -21,8 +21,8 @@ function cleanup() {
   if (fs.existsSync(jsOutputFile)) fs.unlinkSync(jsOutputFile);
 }
 
-function exorcist(inputFile, scriptMapfile, outputFile, customArgs) {
-  customArgs = [binPath, scriptMapfile, outputFile].concat(customArgs || [])
+function exorcist(inputFile, scriptMapfile, customArgs) {
+  customArgs = [binPath, scriptMapfile].concat(customArgs || [])
   var exorcistProcess = spawn(process.execPath, customArgs, {stdio:'pipe'})
   fs.createReadStream(inputFile).pipe(exorcistProcess.stdin)
   return exorcistProcess
@@ -34,7 +34,7 @@ test('\nwhen output file is not provided, outputs to stdout', function (t) {
   var data = ''
   var inputFile = fixtures + '/bundle.js'
 
-  exorcist(inputFile, scriptMapfile, '')
+  exorcist(inputFile, scriptMapfile, [''])
     .on('close', function(){
 
       t.equal(fs.existsSync(scriptMapfile), true, 'output file must exist')
@@ -63,7 +63,7 @@ test('\nwhen output file is not provided, outputs to stdout', function (t) {
 test('\nwhen output file is provided, outputs to a file', function (t) {
   t.on('end', cleanup);
 
-  exorcist(fixtures + '/bundle.js', scriptMapfile, jsOutputFile)
+  exorcist(fixtures + '/bundle.js', scriptMapfile, [jsOutputFile])
     .on('close', function(){
 
       t.equal(fs.existsSync(jsOutputFile), true, 'output file must exist')
@@ -122,7 +122,7 @@ test('\nwhen output to stdout, it can read options', function (t) {
 test('\nwhen output file is provided, it can read options', function (t) {
   t.on('end', cleanup);
 
-  exorcist(fixtures + '/bundle.js', scriptMapfile, jsOutputFile, ['-u', 'http://my.awseome.site/bundle.js.map'])
+  exorcist(fixtures + '/bundle.js', scriptMapfile, [jsOutputFile, '-u', 'http://my.awseome.site/bundle.js.map'])
     .on('close', function(){
 
       t.equal(fs.existsSync(jsOutputFile), true, 'output file must exist')

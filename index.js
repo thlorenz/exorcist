@@ -68,12 +68,18 @@ function exorcist(fileOrStream, url, root, base) {
     url = url || path.basename(fileOrStream)
     var separated = separate(src, url, root, base);
 
-    function done() { write(separated.comment); }
-
     if ('object' === typeof fileOrStream) {
       fileOrStream.end(separated.json, 'utf8', done);
     } else {
       fs.writeFile(fileOrStream, separated.json, 'utf8', done);
+    }
+    
+    function done(error) {
+      if (error) {
+        stream.emit('error', error);
+        return;
+      }
+      write(separated.comment);
     }
   });
 

@@ -21,11 +21,11 @@
   "homepage": "https://github.com/thlorenz/exorcist",
   "dependencies": {
     "minimist": "0.0.5",
-    "mold-source-map": "~0.4.0",
-    "nave": "~0.5.1"
+    "mold-source-map": "~0.4.0"
   },
   "devDependencies": {
     "browserify": "~10.2.0",
+    "nave": "~0.5.1",
     "tap": "~0.4.3",
     "through2": "~0.4.0"
   },

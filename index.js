@@ -11,7 +11,10 @@ function separate(src, file, root, base, url) {
   }
 
   var json = src.toJSON(2);
-
+  
+  if (typeof url === 'function') {
+    url = url();
+  }
   url = url || path.basename(file);
 
   var comment = '';

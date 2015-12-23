@@ -18,6 +18,7 @@ function cleanup() {
   if (fs.existsSync(styleMapfile)) fs.unlinkSync(styleMapfile);
 }
 
+
 test('\nwhen piping a bundle generated with browserify through exorcist without adjusting properties', function (t) {
   t.on('end', cleanup);
   var data = ''
@@ -39,7 +40,7 @@ test('\nwhen piping a bundle generated with browserify through exorcist without 
       t.equal(map.sources[0].indexOf(base), 0, 'uses absolute source paths')
       t.equal(map.sourcesContent.length, 4, 'includes 4 source contents')
       t.equal(map.mappings.length, 106, 'maintains mappings')
-      t.equal(map.sourceRoot, '', 'leaves source root an empty string')
+      t.equal(map.sourceRoot, '', 'if source root missing, emplaces empty string')
 
       cb();
       t.end()
@@ -66,7 +67,7 @@ test('\nwhen piping a bundle generated with browserify through exorcist and adju
       t.equal(map.sources.length, 4, 'maps 4 source files')
       t.equal(map.sourcesContent.length, 4, 'includes 4 source contents')
       t.equal(map.mappings.length, 106, 'maintains mappings')
-      t.equal(map.sourceRoot, '', 'leaves source root an empty string')
+      t.equal(map.sourceRoot, '', 'if source root missing, emplaces empty string')
 
       cb();
       t.end()
@@ -168,9 +169,28 @@ test('\nwhen performing a stylish exorcism', function (t) {
     t.equal(map.sources.length, 2, 'maps 4 source files')
     t.equal(map.sourcesContent.length, 2, 'includes 4 source contents')
     t.equal(map.mappings.length, 214, 'maintains mappings')
-    t.equal(map.sourceRoot, '', 'leaves source root an empty string')
+    t.equal(map.sourceRoot, '', 'if source root missing, emplaces empty string')
 
     cb();
     t.end();
   }
+})
+
+
+test('\nwhen piping a bundle generated with browserify with preexisting source root', function(t) {
+  t.on('end', cleanup);
+
+  fs.createReadStream(fixtures + '/bundle.withroot.js')
+    .pipe(exorcist(scriptMapfile))
+    .pipe(through(onread, onflush));
+
+    function onread(_, __, cb) { cb(); }
+
+    function onflush(cb) {
+      var map = JSON.parse(fs.readFileSync(scriptMapfile, 'utf8'));
+      t.equal(map.sourceRoot, base, 'leaves source root value in place')
+
+      cb();
+      t.end();
+    }
 })

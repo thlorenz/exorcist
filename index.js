@@ -6,7 +6,7 @@ var mold = require('mold-source-map')
   , mkdirp = require('mkdirp');
 
 function separate(src, file, root, base, url) {
-  src.sourceRoot(root || '');
+  src.sourceRoot(root || src.sourcemap.getProperty('sourceRoot') || '');
   if (base) {
     src.mapSources(mold.mapPathRelativeTo(base));
   }

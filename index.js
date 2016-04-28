@@ -73,7 +73,7 @@ function exorcist(fileOrStream, url, root, base) {
     } else {
       fs.writeFile(fileOrStream, separated.json, 'utf8', done);
     }
-    
+
     function done(error) {
       if (error) {
         stream.emit('error', error);

@@ -128,6 +128,19 @@ test('\nwhen piping a bundle generated with browserify through exorcist and adju
     }
 })
 
+test('\nwhen piping a bundle generated with browserify to a map file in a directory that does not exist', function (t) {
+  t.on('end', cleanup);
+  var badPathScriptMapfile = fixtures + '/noexists/bundle.js.map';
+  fs.createReadStream(fixtures + '/bundle.js')
+    .pipe(exorcist(badPathScriptMapfile))
+    .on('error', onerror);
+
+  function onerror(err) {
+    t.type(err, 'Error');
+    t.end();
+  }
+})
+
 test('\nwhen piping a bundle generated with browserify thats missing a map through exorcist' , function (t) {
   t.on('end', cleanup);
   var data = ''

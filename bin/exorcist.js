@@ -7,6 +7,11 @@ var minimist = require('minimist')
   , exorcist = require('../')
   ;
 
+function onerror(err) {
+  console.error(err.toString());
+  process.exit(err.errno || 1);
+}
+
 function usage() {
   var usageFile = path.join(__dirname, 'usage.txt');
   fs.createReadStream(usageFile).pipe(process.stdout);
@@ -37,7 +42,7 @@ mapfile = path.resolve(mapfile);
 
 process.stdin
   .pipe(exorcist(mapfile, url, root, base))
-  .on('error', console.error.bind(console))
+  .on('error', onerror)
   .on('missing-map', console.error.bind(console))
   .pipe(process.stdout);
 

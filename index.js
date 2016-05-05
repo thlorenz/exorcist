@@ -62,7 +62,8 @@ function exorcist(file, url, root, base) {
     }
 
     var separated = separate(src, file, root, base, url);
-    fs.writeFile(file, separated.json, 'utf8', function() {
+    fs.writeFile(file, separated.json, 'utf8', function(err) {
+      if (err) return stream.emit('error', err);
       write(separated.comment);
     });
   });

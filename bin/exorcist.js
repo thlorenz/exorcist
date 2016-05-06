@@ -21,7 +21,7 @@ function usage() {
 (function damnYouEsprima() {
 
 var argv = minimist(process.argv.slice(2)
-  , { boolean: [ 'h', 'help' ]
+  , { boolean: [ 'h', 'help', 'e', 'error-on-missing' ]
     , string: [ 'url', 'u', 'root', 'r', 'base', 'b' ]
   });
 
@@ -34,14 +34,15 @@ if (!mapfile) {
   return usage();
 }
 
-var url  = argv.url  || argv.u
-  , root = argv.root || argv.r
-  , base = argv.base || argv.b;
+var url            = argv.url            || argv.u
+  , root           = argv.root           || argv.r
+  , base           = argv.base           || argv.b
+  , errorOnMissing = argv.errorOnMissing || argv.e;
 
 mapfile = path.resolve(mapfile);
 
 process.stdin
-  .pipe(exorcist(mapfile, url, root, base))
+  .pipe(exorcist(mapfile, url, root, base, errorOnMissing))
   .on('error', onerror)
   .on('missing-map', console.error.bind(console))
   .pipe(process.stdout);

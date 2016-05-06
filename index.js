@@ -39,7 +39,7 @@ var go = module.exports =
  *
  * #### Events (in addition to stream events)
  *
- * - `missing-map` emitted if no map was found in the stream
+ * - `missing-map` emitted if no map was found in the stream and errorOnMissing is falsey
  *   (the src is still piped through in this case, but no map file is written)
  *
  * @name exorcist
@@ -48,14 +48,17 @@ var go = module.exports =
  * @param {String=} url full URL to the map file, set as `sourceMappingURL` in the streaming output (default: file)
  * @param {String=} root root URL for loading relative source paths, set as `sourceRoot` in the source map (default: '')
  * @param {String=} base base path for calculating relative source paths (default: use absolute paths)
+ * @param {Boolean=} errorOnMissing when truthy, causes 'error' to be emitted instead of 'missing-map' if no map was found in the stream (default: falsey)
  * @return {TransformStream} transform stream into which to pipe the code containing the source map
  */
-function exorcist(file, url, root, base) {
+function exorcist(file, url, root, base, errorOnMissing) {
+  var missingMapMsg = "The code that you piped into exorcist contains no source map!";
   var stream = mold.transform(function(src, write) {
     if (!src.sourcemap) {
+      if (errorOnMissing) return stream.emit('error', new Error(missingMapMsg));
       stream.emit(
         'missing-map'
-        ,   'The code that you piped into exorcist contains no source map!\n'
+        ,   missingMapMsg + '\n'
           + 'Therefore it was piped through as is and no external map file generated.'
       );
       return write(src.source);

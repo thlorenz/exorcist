@@ -136,12 +136,25 @@ test('\nwhen piping a bundle generated with browserify to a map file in a direct
     .on('error', onerror);
 
   function onerror(err) {
-    t.type(err, 'Error');
+    t.type(err, 'Error', 'emits an Error');
     t.end();
   }
 })
 
-test('\nwhen piping a bundle generated with browserify thats missing a map through exorcist' , function (t) {
+test('\nwhen piping a bundle generated with browserify thats missing a map through exorcist and errorOnMissing is truthy' , function (t) {
+  t.on('end', cleanup);
+  var data = ''
+  fs.createReadStream(fixtures + '/bundle.nomap.js')
+    .pipe(exorcist(scriptMapfile, undefined, undefined, undefined, true))
+    .on('error', onerror);
+
+  function onerror(err) {
+    t.type(err, 'Error', 'emits an Error');
+    t.end();
+  }
+})
+
+test('\nwhen piping a bundle generated with browserify thats missing a map through exorcist and errorOnMissing is falsey' , function (t) {
   t.on('end', cleanup);
   var data = ''
   var missingMapEmitted = false;

@@ -48,9 +48,19 @@ exorcist map_file [options]
 
 OPTIONS:
 
-  --base -b   Base path for calculating relative source paths. (default: use absolute paths)
-  --root -r   Root URL for loading relative source paths. Set as sourceRoot in the source map. (default: '')
-  --url  -u   Full URL to source map. Set as sourceMappingURL in the output stream. (default: map_file)
+              --base -b   Base path for calculating relative source paths.
+                          (default: use absolute paths)
+
+              --root -r   Root URL for loading relative source paths.
+                          Set as sourceRoot in the source map.
+                          (default: '')
+
+               --url -u   Full URL to source map.
+                          Set as sourceMappingURL in the output stream.
+                          (default: map_file)
+
+  --error-on-missing -e   Abort with error if no map is found in the stream.
+                          (default: warn but still pipe through source)
 
 EXAMPLE:
 
@@ -79,7 +89,7 @@ EXAMPLE:
 </div>
 <dl>
 <dt>
-<h4 class="name" id="exorcist"><span class="type-signature"></span>exorcist<span class="signature">(file, <span class="optional">url</span>, <span class="optional">root</span>, <span class="optional">base</span>)</span><span class="type-signature"> &rarr; {TransformStream}</span></h4>
+<h4 class="name" id="exorcist"><span class="type-signature"></span>exorcist<span class="signature">(file, <span class="optional">url</span>, <span class="optional">root</span>, <span class="optional">base</span>, <span class="optional">errorOnMissing</span>)</span><span class="type-signature"> &rarr; {TransformStream}</span></h4>
 </dt>
 <dd>
 <div class="description">
@@ -88,7 +98,7 @@ EXAMPLE:
 <code>sourceMappingURL</code> set to the path of <code>file</code> (or to the value of <code>url</code>).</p>
 <h4>Events (in addition to stream events)</h4>
 <ul>
-<li><code>missing-map</code> emitted if no map was found in the stream
+<li><code>missing-map</code> emitted if no map was found in the stream and errorOnMissing is falsey
 (the src is still piped through in this case, but no map file is written)</li>
 </ul>
 </div>
@@ -142,6 +152,16 @@ EXAMPLE:
 </td>
 <td class="description last"><p>base path for calculating relative source paths (default: use absolute paths)</p></td>
 </tr>
+<tr>
+<td class="name"><code>errorOnMissing</code></td>
+<td class="type">
+<span class="param-type">Boolean</span>
+</td>
+<td class="attributes">
+&lt;optional><br>
+</td>
+<td class="description last"><p>when truthy, causes 'error' to be emitted instead of 'missing-map' if no map was found in the stream (default: falsey)</p></td>
+</tr>
 </tbody>
 </table>
 <dl class="details">
@@ -150,7 +170,7 @@ EXAMPLE:
 <li>
 <a href="https://github.com/thlorenz/exorcist/blob/master/index.js">index.js</a>
 <span>, </span>
-<a href="https://github.com/thlorenz/exorcist/blob/master/index.js#L34">lineno 34</a>
+<a href="https://github.com/thlorenz/exorcist/blob/master/index.js#L33">lineno 33</a>
 </li>
 </ul></dd>
 </dl>

@@ -4,15 +4,13 @@ var mold = require('mold-source-map')
   , path = require('path')
   , fs = require('fs');
 
-function separate(src, file, root, base, url) {
+function separate(src, url, root, base) {
   src.sourceRoot(root || '');
   if (base) {
     src.mapSources(mold.mapPathRelativeTo(base));
   }
 
   var json = src.toJSON(2);
-
-  url = url || path.basename(file);
 
   var comment = '';
   var commentRx = /^\s*\/(\/|\*)[@#]\s+sourceMappingURL/mg;
@@ -28,7 +26,7 @@ function separate(src, file, root, base, url) {
   return { json: json, comment: comment }
 }
 
-var go = module.exports = 
+var go = module.exports =
 
 /**
  *
@@ -44,14 +42,15 @@ var go = module.exports =
  *
  * @name exorcist
  * @function
- * @param {String} file full path to the map file to which to write the extracted source map
+ * @param {String|Object} fileOrStream full path to the map file to which to write the extracted source map
+ *                        or Stream to write source map to (must provide url when providing a stream)
  * @param {String=} url full URL to the map file, set as `sourceMappingURL` in the streaming output (default: file)
  * @param {String=} root root URL for loading relative source paths, set as `sourceRoot` in the source map (default: '')
  * @param {String=} base base path for calculating relative source paths (default: use absolute paths)
  * @param {Boolean=} errorOnMissing when truthy, causes 'error' to be emitted instead of 'missing-map' if no map was found in the stream (default: falsey)
  * @return {TransformStream} transform stream into which to pipe the code containing the source map
  */
-function exorcist(file, url, root, base, errorOnMissing) {
+function exorcist(fileOrStream, url, root, base, errorOnMissing) {
   var missingMapMsg = "The code that you piped into exorcist contains no source map!";
   var stream = mold.transform(function(src, write) {
     if (!src.sourcemap) {
@@ -64,11 +63,27 @@ function exorcist(file, url, root, base, errorOnMissing) {
       return write(src.source);
     }
 
-    var separated = separate(src, file, root, base, url);
-    fs.writeFile(file, separated.json, 'utf8', function(err) {
-      if (err) return stream.emit('error', err);
+    if ('object' === typeof fileOrStream && 'string' !== typeof url) {
+      stream.emit('error', new Error('When specifying a stream to write source map to you must specify a url.'));
+      return;
+    }
+
+    url = url || path.basename(fileOrStream)
+    var separated = separate(src, url, root, base);
+
+    if ('object' === typeof fileOrStream) {
+      fileOrStream.end(separated.json, 'utf8', done);
+    } else {
+      fs.writeFile(fileOrStream, separated.json, 'utf8', done);
+    }
+
+    function done(error) {
+      if (error) {
+        stream.emit('error', error);
+        return;
+      }
       write(separated.comment);
-    });
+    }
   });
 
   return stream;

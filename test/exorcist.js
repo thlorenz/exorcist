@@ -133,12 +133,13 @@ test('\nwhen piping a bundle generated with browserify to a map file in a direct
   var badPathScriptMapfile = fixtures + '/noexists/bundle.js.map';
   fs.createReadStream(fixtures + '/bundle.js')
     .pipe(exorcist(badPathScriptMapfile))
-    .on('error', onerror);
-
-  function onerror(err) {
-    t.type(err, 'Error', 'emits an Error');
-    t.end();
-  }
+    .on('error', t.end)
+    .on('end', function () {
+      var map = JSON.parse(fs.readFileSync(badPathScriptMapfile, 'utf8'));
+      t.ok(map);
+      fs.unlinkSync(badPathScriptMapfile);
+      t.end();
+    })
 })
 
 test('\nwhen piping a bundle generated with browserify thats missing a map through exorcist and errorOnMissing is truthy' , function (t) {

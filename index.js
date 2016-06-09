@@ -2,7 +2,8 @@
 
 var mold = require('mold-source-map')
   , path = require('path')
-  , fs = require('fs');
+  , fs = require('fs')
+  , mkdirp = require('mkdirp');
 
 function separate(src, file, root, base, url) {
   src.sourceRoot(root || '');
@@ -65,10 +66,13 @@ function exorcist(file, url, root, base, errorOnMissing) {
     }
 
     var separated = separate(src, file, root, base, url);
-    fs.writeFile(file, separated.json, 'utf8', function(err) {
+    mkdirp(path.dirname(file), function (err) {
       if (err) return stream.emit('error', err);
-      write(separated.comment);
-    });
+      fs.writeFile(file, separated.json, 'utf8', function(err) {
+        if (err) return stream.emit('error', err);
+        write(separated.comment);
+      });
+    })
   });
 
   return stream;

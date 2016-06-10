@@ -6,7 +6,7 @@ var mold = require('mold-source-map')
   , mkdirp = require('mkdirp');
 
 function separate(src, file, root, base, url) {
-  src.sourceRoot(root || '');
+  src.sourceRoot(root || src.sourcemap.getProperty('sourceRoot') || '');
   if (base) {
     src.mapSources(mold.mapPathRelativeTo(base));
   }
@@ -29,7 +29,7 @@ function separate(src, file, root, base, url) {
   return { json: json, comment: comment }
 }
 
-var go = module.exports = 
+var go = module.exports =
 
 /**
  *

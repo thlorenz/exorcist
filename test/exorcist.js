@@ -3,7 +3,8 @@
 
 var test     = require('tap').test
 var fs       = require('fs');
-var through  = require('through2')
+var through  = require('through2');
+var proxyquire = require('proxyquire');
 var exorcist = require('../')
 
 var fixtures = __dirname + '/fixtures';
@@ -138,6 +139,24 @@ test('\nwhen piping a bundle generated with browserify to a map file in a direct
       var map = JSON.parse(fs.readFileSync(badPathScriptMapfile, 'utf8'));
       t.ok(map);
       fs.unlinkSync(badPathScriptMapfile);
+      t.end();
+    })
+})
+
+test('\nwhen piping a bundle generated with browserify and the write fails', function (t) {
+  t.on('end', cleanup);
+  var expectedErr = new Error('File write failed')
+  var ex = proxyquire('../', {
+    fs: {
+      writeFile: function (file, content, enc, callback) {
+        callback(expectedErr)
+      }
+    }
+  })
+  fs.createReadStream(fixtures + '/bundle.js')
+    .pipe(ex(scriptMapfile))
+    .on('error', function (err) {
+      t.equal(err, expectedErr)
       t.end();
     })
 })

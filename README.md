@@ -11,9 +11,9 @@ var browserify = require('browserify')
   , exorcist   = require('exorcist')
   , mapfile    = path.join(__dirname, 'bundle.js.map')
 
-browserify()
+browserify({ debug: true })
   .require(require.resolve('./main'), { entry: true })
-  .bundle({ debug: true })
+  .bundle()
   .pipe(exorcist(mapfile))
   .pipe(fs.createWriteStream(path.join(__dirname, 'bundle.js'), 'utf8'))
 ```

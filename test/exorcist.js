@@ -170,7 +170,7 @@ test('\nwhen piping a bundle generated with browserify thats missing a map throu
     .on('error', onerror);
 
   function onerror(err) {
-    t.type(err, 'Error', 'emits an Error');
+    t.type(err, 'Error');
     t.end();
   }
 })
@@ -238,4 +238,59 @@ test('\nwhen piping a bundle generated with browserify with preexisting source r
       cb();
       t.end();
     }
+});
+
+test('\nwhen piping a bundle generated with browserify through exorcist without adjusting properties and sending source map to stream', function (t) {
+  t.on('end', cleanup);
+  var data = ''
+  var map = ''
+
+  fs.createReadStream(fixtures + '/bundle.js')
+    .pipe(exorcist(through(onreadMap, onflushMap), 'bundle.js.map'))
+    .pipe(through(onread, onflush));
+
+  function onread(d, _, cb) { data += d; cb(); }
+
+  function onflush(cb) {
+    var lines = data.split('\n')
+    lines.pop(); // Trailing newline
+    t.equal(lines.length, 25, 'pipes entire bundle including prelude, sources and source map url')
+    t.equal(lines.pop(), '//# sourceMappingURL=bundle.js.map', 'last line as source map url pointing to .js.map file')
+
+    cb();
+    t.end()
+  }
+
+  function onreadMap(d, _, cb) { map += d; cb(); }
+
+  function onflushMap(cb) {
+    map = JSON.parse(map);
+    t.equal(map.file, 'generated.js', 'leaves file name unchanged')
+    t.equal(map.sources.length, 4, 'maps 4 source files')
+    t.equal(map.sources[0].indexOf(base), 0, 'uses absolute source paths')
+    t.equal(map.sourcesContent.length, 4, 'includes 4 source contents')
+    t.equal(map.mappings.length, 106, 'maintains mappings')
+    t.equal(map.sourceRoot, '', 'leaves source root an empty string')
+
+    cb();
+  }
+
+})
+
+test('\nwhen piping a browserify bundle thru exorcist sending source map to a stream with missing required url', function (t) {
+  t.on('end', cleanup);
+
+  var exorcistStream =
+    exorcist(through(onread)) // this is missing the URL as second argument
+      .on('error', function (err) {
+        t.ok(/map file URL is required/.test(err.message));
+        t.end();
+      })
+      .on('end', function () {
+        t.fail('should have emitted an error about missing url');
+      });
+
+  fs.createReadStream(fixtures + '/bundle.js').pipe(exorcistStream);
+
+  function onread(d, _, cb) { cb(); }
 })

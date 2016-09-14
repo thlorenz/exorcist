@@ -1,6 +1,6 @@
 # exorcist [![build status](https://secure.travis-ci.org/thlorenz/exorcist.png)](http://travis-ci.org/thlorenz/exorcist)
 
-Externalizes the source map found inside a stream to an external `.map` file.
+Externalizes the source map found inside a stream to an external `.map` file or stream.
 
 Works with both JavaScript and CSS input streams.
 
@@ -11,17 +11,24 @@ var browserify = require('browserify')
   , exorcist   = require('exorcist')
   , mapfile    = path.join(__dirname, 'bundle.js.map')
 
-browserify({ debug: true })
+// from a file, to a file, and send source map to its own file
+browserify({debug: true})
   .require(require.resolve('./main'), { entry: true })
   .bundle()
   .pipe(exorcist(mapfile))
   .pipe(fs.createWriteStream(path.join(__dirname, 'bundle.js'), 'utf8'))
+
+//  from a stream, to a stream, and send source map to a stream
+browserify([readableSourceStream], browserifyOptions)
+  .bundle()
+  .pipe(exorcist(targetSourceMapStream, '/url/path/to/replace/source/comment/with/bundle.js'))
+  .pipe(writableTargetStream)
 ```
 
 ### command line example
 
 ```
-browserify main.js --debug | exorcist bundle.js.map > bundle.js 
+browserify main.js --debug | exorcist bundle.js.map > bundle.js
 ```
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -89,7 +96,7 @@ EXAMPLE:
 </div>
 <dl>
 <dt>
-<h4 class="name" id="exorcist"><span class="type-signature"></span>exorcist<span class="signature">(file, <span class="optional">url</span>, <span class="optional">root</span>, <span class="optional">base</span>, <span class="optional">errorOnMissing</span>)</span><span class="type-signature"> &rarr; {TransformStream}</span></h4>
+<h4 class="name" id="exorcist"><span class="type-signature"></span>exorcist<span class="signature">(input, <span class="optional">url</span>, <span class="optional">root</span>, <span class="optional">base</span>, <span class="optional">errorOnMissing</span>)</span><span class="type-signature"> &rarr; {TransformStream}</span></h4>
 </dt>
 <dd>
 <div class="description">
@@ -114,13 +121,13 @@ EXAMPLE:
 </thead>
 <tbody>
 <tr>
-<td class="name"><code>file</code></td>
+<td class="name"><code>input</code></td>
 <td class="type">
-<span class="param-type">String</span>
+<span class="param-type">String / Object</span>
 </td>
 <td class="attributes">
 </td>
-<td class="description last"><p>full path to the map file to which to write the extracted source map</p></td>
+<td class="description last"><p>full path to the map file to which to write the extracted source map or a writable stream</p></td>
 </tr>
 <tr>
 <td class="name"><code>url</code></td>

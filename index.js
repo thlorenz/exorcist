@@ -3,17 +3,17 @@
 var mold = require('mold-source-map')
   , path = require('path')
   , fs = require('fs')
-  , mkdirp = require('mkdirp');
+  , mkdirp = require('mkdirp')
+  , isStream = require('is-stream')
+  , fs = require('fs');
 
-function separate(src, file, root, base, url) {
+function separate(src, url, root, base) {
   src.sourceRoot(root || src.sourcemap.getProperty('sourceRoot') || '');
   if (base) {
     src.mapSources(mold.mapPathRelativeTo(base));
   }
 
   var json = src.toJSON(2);
-
-  url = url || path.basename(file);
 
   var comment = '';
   var commentRx = /^\s*\/(\/|\*)[@#]\s+sourceMappingURL/mg;
@@ -29,7 +29,7 @@ function separate(src, file, root, base, url) {
   return { json: json, comment: comment }
 }
 
-var go = module.exports = 
+var go = module.exports =
 
 /**
  *
@@ -45,15 +45,17 @@ var go = module.exports =
  *
  * @name exorcist
  * @function
- * @param {String} file full path to the map file to which to write the extracted source map
+ * @param {String|Object} input file path or writable stream where the source map will be written
  * @param {String=} url full URL to the map file, set as `sourceMappingURL` in the streaming output (default: file)
  * @param {String=} root root URL for loading relative source paths, set as `sourceRoot` in the source map (default: '')
  * @param {String=} base base path for calculating relative source paths (default: use absolute paths)
  * @param {Boolean=} errorOnMissing when truthy, causes 'error' to be emitted instead of 'missing-map' if no map was found in the stream (default: falsey)
  * @return {TransformStream} transform stream into which to pipe the code containing the source map
  */
-function exorcist(file, url, root, base, errorOnMissing) {
+
+function exorcist(input, url, root, base, errorOnMissing) {
   var missingMapMsg = "The code that you piped into exorcist contains no source map!";
+
   var stream = mold.transform(function(src, write) {
     if (!src.sourcemap) {
       if (errorOnMissing) return stream.emit('error', new Error(missingMapMsg));
@@ -65,14 +67,30 @@ function exorcist(file, url, root, base, errorOnMissing) {
       return write(src.source);
     }
 
-    var separated = separate(src, file, root, base, url);
-    mkdirp(path.dirname(file), function (err) {
+    if (isStream(input) && isStream.writable(stream)) {
+      return stream.emit('error', new Error('Must provide a writable stream'));
+    }
+
+    if (isStream(input) && typeof url !== 'string') {
+      return stream.emit('error', new Error('map file URL is required when using stream output'));
+    }
+
+    url = url || path.basename(input)
+    var separated = separate(src, url, root, base);
+
+    if (isStream(input)) {
+      return input.end(separated.json, 'utf8', done);
+    }
+
+    mkdirp(path.dirname(input), function (err) {
+      if (err) return done(err);
+      fs.writeFile(input, separated.json, 'utf8', done);
+    });
+
+    function done(err) {
       if (err) return stream.emit('error', err);
-      fs.writeFile(file, separated.json, 'utf8', function(err) {
-        if (err) return stream.emit('error', err);
-        write(separated.comment);
-      });
-    })
+      write(separated.comment);
+    }
   });
 
   return stream;

@@ -37,7 +37,7 @@ if (!mapfile) {
 var url            = argv.url            || argv.u
   , root           = argv.root           || argv.r
   , base           = argv.base           || argv.b
-  , errorOnMissing = argv.errorOnMissing || argv.e;
+  , errorOnMissing = argv.errorOnMissing || argv.e || argv['error-on-missing'];
 
 mapfile = path.resolve(mapfile);
 

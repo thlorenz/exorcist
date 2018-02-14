@@ -1,4 +1,6 @@
-# exorcist [![build status](https://secure.travis-ci.org/thlorenz/exorcist.png)](http://travis-ci.org/thlorenz/exorcist)
+# exorcist [![build status](https://secure.travis-ci.org/thlorenz/exorcist.svg?branch=master)](http://travis-ci.org/thlorenz/exorcist)
+
+<a href="https://www.patreon.com/bePatron?u=8663953"><img alt="become a patron" src="https://c5.patreon.com/external/logo/become_a_patron_button.png" height="35px"></a>
 
 Externalizes the source map found inside a stream to an external `.map` file or stream.
 

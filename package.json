@@ -21,7 +21,7 @@
   "homepage": "https://github.com/thlorenz/exorcist",
   "dependencies": {
     "is-stream": "~1.1.0",
-    "minimist": "0.0.5",
+    "minimist": "1.2.5",
     "mkdirp": "~0.5.1",
     "mold-source-map": "~0.4.0"
   },

@@ -26,11 +26,11 @@
     "mold-source-map": "~0.4.0"
   },
   "devDependencies": {
-    "browserify": "~10.2.0",
-    "nave": "~0.5.1",
-    "proxyquire": "~1.7.9",
-    "tap": "~0.4.3",
-    "through2": "~0.4.0"
+    "browserify": "^17.0.0",
+    "nave": "^3.2.2",
+    "proxyquire": "^2.1.3",
+    "tap": "^14.11.0",
+    "through2": "^4.0.2"
   },
   "keywords": [
     "source-map",

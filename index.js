@@ -82,10 +82,9 @@ function exorcist(input, url, root, base, errorOnMissing) {
       return input.end(separated.json, 'utf8', done);
     }
 
-    mkdirp(path.dirname(input), function (err) {
-      if (err) return done(err);
-      fs.writeFile(input, separated.json, 'utf8', done);
-    });
+    mkdirp(path.dirname(input))
+      .then(() => fs.writeFile(input, separated.json, 'utf8', done))
+      .catch(done);
 
     function done(err) {
       if (err) return stream.emit('error', err);

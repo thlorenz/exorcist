@@ -44,5 +44,11 @@
   "license": "MIT",
   "engine": {
     "node": ">=14"
+  },
+  "tap": {
+    "branches": 95,
+    "lines": 95,
+    "functions": 100,
+    "statements": 95
   }
 }
